@@ -1,0 +1,137 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Мой блог</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .hero-section {
+            background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+            padding: 100px 0;
+            color: white;
+            margin-bottom: 50px;
+        }
+        .post-card {
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+            transition: transform 0.3s;
+        }
+        .post-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px rgba(0,0,0,0.2);
+        }
+        .post-header {
+            border-bottom: 1px solid #eee;
+            padding: 20px;
+        }
+        .post-body {
+            padding: 20px;
+            position: relative;
+        }
+        .post-footer {
+            background-color: #f8f9fa;
+            padding: 15px 20px;
+            border-top: 1px solid #eee;
+        }
+        .author-badge {
+            background-color: #e9ecef;
+            border-radius: 20px;
+            padding: 5px 15px;
+            font-size: 0.9rem;
+        }
+        .copy-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        .post-body:hover .copy-btn {
+            opacity: 1;
+        }
+        .copy-success {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <!-- notification of copy -->
+    <div class="copy-success alert alert-success alert-dismissible fade show" role="alert">
+        Текст скопирован в буфер обмена!
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+
+    <!-- main section -->
+    <div class="hero-section text-center">
+        <div class="container">
+            <h1 class="display-4 fw-bold">Добро пожаловать в мой блог Qicchu</h1>
+            <p class="lead">Читайте последние записи</p>
+        </div>
+    </div>
+
+    <!-- section with posts -->
+    <div class="container">
+        <div class="row">
+            {% for post in posts %}
+            <div class="col-lg-6">
+                <div class="post-card">
+                    <div class="post-header">
+                        <h2 class="h4">{{ post.title }}</h2>
+                    </div>
+                    <div class="post-body">
+                        <button class="copy-btn btn btn-sm btn-outline-secondary"
+                                onclick="copyToClipboard('post-content-{{ forloop.counter }}')">
+                            <i class="bi bi-clipboard"></i> Копировать
+                        </button>
+                        <div id="post-content-{{ forloop.counter }}">{{ post.content }}</div>
+                        <a href="#" class="btn btn-primary mt-3">Читать далее</a>
+                    </div>
+                    <div class="post-footer d-flex justify-content-between align-items-center">
+                        <span class="author-badge">{{ post.author }}</span>
+                        <small class="text-muted">{{ post.publish }}</small>
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <div class="col-12">
+                <div class="alert alert-info">Пока нет ни одной записи</div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- footer -->
+    <footer class="bg-dark text-white py-4 mt-5">
+        <div class="container text-center">
+            <p>© 2025 Мой блог. Все права защищены.</p>
+        </div>
+    </footer>
+
+    <!-- Bootstrap JS + icons -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+
+    <script>
+        function copyToClipboard(elementId) {
+            const element = document.getElementById(elementId);
+            const text = element.innerText;
+
+            navigator.clipboard.writeText(text).then(() => {
+                const alert = document.querySelector('.copy-success');
+                alert.style.display = 'block';
+                setTimeout(() => {
+                    alert.style.display = 'none';
+                }, 2000);
+            });
+        }
+    </script>
+</body>
+</html>

@@ -24,7 +24,7 @@ class Post(models.Model):
     #     super().save(*args, **kwargs)
 
     class Meta:
-        ordering = ['-publish']
+        ordering = ['-publish',]
 
     def __str__(self):
         return self.title
