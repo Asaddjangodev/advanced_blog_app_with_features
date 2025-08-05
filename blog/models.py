@@ -1,9 +1,7 @@
 from django.db import models
 from django.utils import timezone
 from django.contrib.auth.models import User
-#from django.utils.text import slugify
-from autoslug import AutoSlugField
-
+from django.urls import reverse
 # Create your models here.
 class Post(models.Model):
 
@@ -14,9 +12,10 @@ class Post(models.Model):
 
     options = (
         ('draft', 'Draft'),
-        ('published', 'Published'),
+        ('published', 'Published')
     )
     title = models.CharField(max_length=250)
+    excerpt = models.TextField(null=True)
     slug = models.SlugField(max_length=250, unique_for_date='publish')
     publish = models.DateTimeField(default=timezone.now)
     author = models.ForeignKey(User, on_delete=models.CASCADE, related_name='blog_posts')
@@ -31,8 +30,25 @@ class Post(models.Model):
     #         self.slug = slugify(self.title)
     #     super().save(*args, **kwargs)
 
+    def get_absolute_url(self):
+        return reverse('blog:post_single', args=[self.slug])
+
     class Meta:
         ordering = ['-publish',]
 
     def __str__(self):
         return self.title
+
+class Comments(models.Model):
+    post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name="comments")
+    name = models.CharField(max_length=50)
+    email = models.EmailField()
+    content = models.TextField()
+    publish = models.DateTimeField(auto_now_add=True)
+    status = models.BooleanField(default=True)
+
+    class Meta:
+        ordering = ['publish',]
+
+    def __str__(self):
+        return f'Comment by {self.name}'
