@@ -2,6 +2,7 @@ from django.db import models
 from django.utils import timezone
 from django.contrib.auth.models import User
 from django.urls import reverse
+from mptt.models import MPTTModel, TreeForeignKey
 # Create your models here.
 
 def user_directory_path(instance, filename):
@@ -54,16 +55,17 @@ class Post(models.Model):
     def __str__(self):
         return self.title
 
-class Comments(models.Model):
+class Comments(MPTTModel):
     post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name="comments")
+    parent = TreeForeignKey('self', on_delete=models.CASCADE, null=True, blank=True, related_name='children')
     name = models.CharField(max_length=50)
     email = models.EmailField()
     content = models.TextField()
     publish = models.DateTimeField(auto_now_add=True)
     status = models.BooleanField(default=True)
 
-    class Meta:
-        ordering = ['publish',]
+    class MPPTMeta:
+        order_insertion_by = ['publish']
 
     def __str__(self):
         return f'Comment by {self.name}'
