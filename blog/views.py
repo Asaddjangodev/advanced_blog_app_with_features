@@ -3,6 +3,7 @@ from .models import Post, Category, Comments
 from .forms import NewCommentForm
 from django.http import HttpResponseRedirect
 from django.views.generic import ListView
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 # Create your views here.
 
 
@@ -13,7 +14,17 @@ def home(request):
 
 def post_single(request, post):
     post = get_object_or_404(Post, slug=post, status='published')
-    comments = post.comments.filter(status=True)
+    allcomments = post.comments.filter(status=True)
+    page = request.GET.get('page', 1)
+    paginator = Paginator(allcomments, 6)
+
+    try:
+        comments = paginator.page(page)
+    except PageNotAnInteger:
+        comments = paginator.page(1)
+    except EmptyPage:
+        comments = paginator.page(paginator.num_pages)
+
 
     user_comment = None
     if request.method == "POST":
@@ -25,7 +36,8 @@ def post_single(request, post):
              return HttpResponseRedirect('/' + post.slug)
     else:
         comment_form = NewCommentForm()
-    return render(request, "single.html", {'post': post, "comments": comments, "comment_form": comment_form})
+    return render(request, "single.html", {'post': post, "comments": comments, "comment_form": comment_form,
+                                         "page": page, "paginator": paginator})
 
     #return render(request, 'single.html', {'post': post})
 
