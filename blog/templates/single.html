@@ -77,6 +77,21 @@
         .avatar {
             font-weight: bold;
         }
+
+        .comment-card {
+            border-left: 3px solid #dee2e6;
+            transition: all 0.3s ease;
+        }
+
+        .comment-card:hover {
+            border-left-color: #0d6efd;
+            box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+        }
+
+        .children {
+            border-left: 2px dashed #eee;
+            padding-left: 15px;
+        }
     </style>
 </head>
 <body>
@@ -135,28 +150,57 @@
                     </div>
                 <!-- Список комментариев -->
             <div class="comments-list mb-4">
-                {% for comment in post.comments.all %}
-                <div class="comment mb-3 d-flex">
-                    <div class="flex-shrink-0">
-                        <div class="avatar bg-primary text-white rounded-circle d-flex align-items-center justify-content-center"
-                             style="width: 40px; height: 40px;">
-                            {{ comment.name|first|upper }}
-                        </div>
+                {% load mptt_tags %}
+
+                <div class="comments-list">
+        {% recursetree comments %}
+            <div class="card mb-3 comment-card" style="margin-left: {% widthratio node.level 1 30 %}px;">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <h6 class="card-subtitle mb-2 text-muted">User {{ node.name }}</h6>
+                        <small class="text-muted">{{ node.publish|date:"d M Y H:i" }}</small>
                     </div>
-                    <div class="flex-grow-1 ms-3">
-                        <div class="d-flex justify-content-between align-items-center">
-                            <h6 class="mb-0">{{ comment.name }}</h6>
-                            <small class="text-muted">{{ comment.publish|date:"d M Y H:i" }}</small>
-                        </div>
-                            <p class="mb-0 mt-2">{{ comment.content }}</p>
+                    <h6 class="card-subtitle mb-2 text-muted">{{ node.level }}</h6>
+                    <h6 class="card-subtitle mb-2 text-muted">{{ node.id }}</h6>
+                    <div id="{{ node.id }}"><p class="card-text">{{ node.content }}</p></div>
+                    <button class="btn btn-sm btn-outline-primary reply-btn"
+                            data-comment-id="{{ node.id }}" onclick="myFunction({{ node.id }})">
+                        Ответить
+                    </button>
+                </div>
+
+                {% if not node.is_leaf_node %}
+                    <div class="children mt-3">
+                        {{ children }}
                     </div>
-                </div>
-                {% empty %}
-                <div class="text-center py-3 text-muted">
-                    Пока нет комментариев. Будьте первым!
-                </div>
-                {% endfor %}
+                {% endif %}
             </div>
+        {% endrecursetree %}
+    </div>
+</div>
+
+<!--                {% for comment in post.comments.all %} &ndash;&gt;-->
+<!--                <div class="comment mb-3 d-flex">-->
+<!--                    <div class="flex-shrink-0">-->
+<!--                        <div class="avatar bg-primary text-white rounded-circle d-flex align-items-center justify-content-center"-->
+<!--                             style="width: 40px; height: 40px;">-->
+<!--                            {{ comment.name|first|upper }}-->
+<!--                        </div>-->
+<!--                    </div>-->
+<!--                    <div class="flex-grow-1 ms-3">-->
+<!--                        <div class="d-flex justify-content-between align-items-center">-->
+<!--                            <h6 class="mb-0">{{ comment.name }}</h6>-->
+<!--                            <small class="text-muted">{{ comment.publish|date:"d M Y H:i" }}</small>-->
+<!--                        </div>-->
+<!--                            <p class="mb-0 mt-2">{{ comment.content }}</p>-->
+<!--                    </div>-->
+<!--                </div>-->
+<!--                {% empty %}-->
+<!--                <div class="text-center py-3 text-muted">-->
+<!--                    Пока нет комментариев. Будьте первым!-->
+<!--                </div>-->
+<!--                {% endfor %}-->
+<!--            </div>-->
                     <!-- Форма добавления комментария -->
             <div class="comment-form">
                 <h5 class="mb-3">Оставить комментарий</h5>
@@ -247,6 +291,39 @@
                 alert('Скопируйте ссылку: ' + window.location.href);
             }
         }
+
+        // function to close the reply form
+        function formExit() {
+            document.getElementById("newForm").remove();
+        }
+
+        // comment reply function
+        function myFunction(id) {
+
+            if (document.contains(document.getElementById("newForm"))) {
+                document.getElementById("newForm").remove();
+            }
+
+            var a = document.getElementById(id);
+            a.insertAdjacentHTML('afterend',
+                '<form id="newForm" class="form-insert py-2" method="post"> \
+                <div class="d-flex justify-content-between"><h2>Reply:</h2><div><button type="button" class="btn btn-outline-secondary" onclick="formExit({{ node.id }})"">Close</button></div></div> \
+                <label for="id_name">Name:</label> \
+                <input type="text" name="name" class="col-sm-12" maxlength="50" required="" id="id_name">\
+                <select name="parent" class="d-none" id="id_parentt"> \
+                <option value="' + id + '" selected="' + id + '"></option> \
+                </select> \
+                <label for="id_email">Email:</label> \
+                <input type="text" name="email" class="col-sm-12" maxlength="254" required="" id="id_email"> \
+                <label for="id_content">Content:</label> \
+                <textarea name="content" cols="40" rows="5" class="form-control" required id="id_content"></textarea> \
+                {% csrf_token %} \
+                <button type="submit" class="btn btn-primary btn-lg">Отправить</button> \
+              </form>'
+            );
+        }
+
+
     </script>
 </body>
 </html>
