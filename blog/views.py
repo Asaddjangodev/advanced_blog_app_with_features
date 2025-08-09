@@ -63,4 +63,12 @@ def category_list(request):
 def post_search(request):
     form = PostSearchForm
     q = ''
-    return render(request, 'search.html', {'form': form, 'q': q})
+    results = []
+
+    if 'q' in request.GET:
+        form = PostSearchForm(request.GET)
+        if form.is_valid():
+            q = form.cleaned_data['q']
+            results = Post.objects.filter(title__contains=q)
+
+    return render(request, 'search.html', {'form': form, 'q': q, 'results': results})

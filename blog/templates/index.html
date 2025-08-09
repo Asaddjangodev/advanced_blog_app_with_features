@@ -242,9 +242,11 @@
             <div class="col-lg-6">
                 <div class="post-card">
                     <div class="post-header">
-                        <a href="{{ post.get_absolute_url }}"><h2 class="h4">{{ post.title }}</h2></a>
+                        <!-- <img src="{{ post.image.url }}" alt="{{ post.slug }}"> -->
                     </div>
                     <div class="post-body">
+                        <a href="{{ post.get_absolute_url }}"><h2 class="h4">{{ post.title }}</h2></a>
+
                         <button class="copy-btn btn btn-sm btn-outline-secondary"
                                 onclick="copyToClipboard('post-content-{{ forloop.counter }}')">
                             <i class="bi bi-clipboard"></i> Копировать
