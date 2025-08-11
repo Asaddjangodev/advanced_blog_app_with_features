@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+
+{% block title %}
+Search
+{% endblock %}
+
+{% block content %}
+
+{% if q %}
+<h1>Post containing "{{ q }}"</h1>
+<p>
+    {% with results.count as total_results %}
+    Found {{ total_results }} result{{ total_results|pluralize }}
+    {% endwith %}
+</p>
+
+{% for post in results %}
+<div class="col-md-4">
+    <a href="{{ post.get_absolute_url }}">
+        <div class="card mb-4 box-shadow">
+            <img class="card img-top" src="{{ post.image_url }}" alt="{{ post.title }}">
+            <div class="card-body">
+                <h2 style="font-size:18px; font-weight:bold">({{ post.title|truncatewords:50 }})</h2>
+                <p class="card-text">({{ post.excerpt|truncatewords:50 }})</p>
+                <div class="d-flex justify-content-between align-items-center">
+                    <small class="text-muted">9 mins</small>
+                </div>
+            </div>
+        </div>
+    </a>
+</div>
+{% empty %}
+<p>There are no results for your query.</p>
+{% endfor %}
+<a href="{% url 'blog:post_search' %}" class="btn btn-primary mt-5" role="button" aria-disabled="true">New Search</a>
+
+{% else %}
+<h1>Search for posts</h1>
+<form action="" method="get">
+    {{ form.q }}
+
+    <ul class="dropdown-menu col-12 pl-2" role="menu" aria-labelledby="menu" id="list">
+        <li role="presentation"><a href="#" role="menuitem" tabindex="-1">HTML</a></li>
+        <div class="dropdown-divider"></div>
+        <li role="presentation" ><a href="#" role="menuitem">CSS</a></li>
+        <div class="dropdown-divider"></div>
+        <li role="presentation"><a href="#" role="menuitem" tabindex="-1">JavaScript</a></li>
+    </ul>
+
+    {{ form.c }}
+
+    <input type="submit" class="btn btn-primary my-1" value="Search">
+
+    <script>
+        $(document).on('keyup', '#id_q', function (e) {
+            e.preventDefault();
+                $.ajax({
+                    type: 'POST',
+                    url: '{% url 'blog:post_search' %}',
+                    data: {
+                        ss: $('#id_q').val()
+                        csrfmiddlewaretoken: $('input[name=csrfmiddlewaretoken]').val(),
+                        action: 'post'
+                    },
+                    success: function (json) {
+                    },
+                    error: function (xhr, errmsg, err) {
+                    }
+                });
+        } else {
+            $('.menudd').trigger('click')
+        })
+    </script>
+{% endif %}
+
+
+
+{% endblock content %}

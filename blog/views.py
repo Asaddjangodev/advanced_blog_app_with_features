@@ -1,6 +1,6 @@
 from django.shortcuts import render, get_object_or_404
 from .models import Post, Category, Comments
-from .forms import NewCommentForm, PostSearchForm
+from .forms import NewCommentForm
 from django.http import HttpResponseRedirect
 from django.views.generic import ListView
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
@@ -37,7 +37,7 @@ def post_single(request, post):
     else:
         comment_form = NewCommentForm()
     return render(request, "single.html", {'post': post, "comments": comments, "comment_form": comment_form,
-                                         "page": page, "paginator": paginator, "allcomments": allcomments})
+                                         "page": page, "paginator": paginator})
 
     #return render(request, 'single.html', {'post': post})
 
@@ -59,8 +59,3 @@ def category_list(request):
         'category_list': category_list,
     }
     return context
-
-def post_search(request):
-    form = PostSearchForm
-    q = ''
-    return render(request, 'search.html', {'form': form, 'q': q})
